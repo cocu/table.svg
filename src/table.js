@@ -145,6 +145,9 @@ var TableSVG = (function () {
       parent = Table;
     } else {
       parent = this.modes[parentModeName];
+      if(parent === undefined){
+        logger.fatal('no such mode error mode:'+parentModeName);
+      }
     }
     var newMode = func(parent, global);
     if (!newMode instanceof Table) {
