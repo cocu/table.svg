@@ -71,7 +71,7 @@ var TableSVG = (function () {
 
     var that = this;
     global.doc.body.addEventListener('mouseup', function () {
-          that.status.isSelecting = false;
+      that.status.isSelecting = false;
       that._activateSelectingCells.call(that)
     });
   }
@@ -136,19 +136,30 @@ var TableSVG = (function () {
       return this.rootElem.node;
     };
     tlproto.createCell = function (row, col, width, height) {
+      var cell = this.genCellElem(row, col, width, height);
+      this.registerCellToTable(cell, row, col);
+      this.setCellHandlers(cell, row, col);
+      return cell;
+    };
+    tlproto.genCellElem = function (row, col, width, height) {
       var cell = Snap(TableSVG.createElement('rect'));
       cell.attr({
         width: width,
         height: height
       });
+      return cell;
+    };
+    tlproto.registerCellToTable = function (cell, row, col) {
       cell.addClass(this.classes.cell);
       cell.data('row', row);
       cell.data('col', col);
       this.cells.push(cell);
-      if(this.table[row]=== undefined){
+      if (this.table[row] === undefined) {
         this.table[row] = {};
       }
       this.table[row][col] = cell;
+    };
+    tlproto.setCellHandlers = function (cell, row, col) {
       var handler = this._eventHandlerFactory(col, row);
       cell.node.addEventListener('mousedown', handler.mousedown);
       cell.node.addEventListener('mouseover', handler.mouseover);

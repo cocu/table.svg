@@ -28,7 +28,7 @@ TableSVG.addMode('vertical-table', 'table', function (Parent, global, _) {
     this._viewHeight = Math.max.apply(null, rowHeights.map(_.sum));
 
     this.rootElem.node.setAttribute('viewBox', '0 0 ' + this._viewWidth + ' ' + this._viewHeight);
- 
+
     this._initTable();
   }
 
@@ -42,16 +42,18 @@ TableSVG.addMode('vertical-table', 'table', function (Parent, global, _) {
       var x = 0;
       this._colWidths.map(function (width, colNo) {
         var y = 0;
-        var cols =  that._rowHeights[colNo].map(function (height, row) {
-          var cell =  that.createCell(row, colNo, width, height);
-          cell.transform('translate(0,'+y+')');
+        var cols = that._rowHeights[colNo].map(function (height, row) {
+          var cell = that.createCell(row, colNo, width, height);
+          cell.transform('translate(0,' + y + ')');
           y += height;
           return cell;
         });
-        var col =  table.g();
-        cols.map(function(c){col.add(c)});
-        col.transform('translate('+x+',0)');
-        x+=width;
+        var col = table.g();
+        cols.map(function (c) {
+          col.add(c)
+        });
+        col.transform('translate(' + x + ',0)');
+        x += width;
         return col;
       })
     };
