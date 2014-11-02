@@ -23,7 +23,7 @@ var TableSVG = (function () {
     return global.doc.createElementNS(xmlns.svg, elemName);
   };
 
-  var modes = {};
+  TableSVG.modes = {};
   var logger = (function () {
     var log = function (level, s) {
       console.log('[table.svg]' + level + ' ' + s);
@@ -140,8 +140,13 @@ var TableSVG = (function () {
   }(Table.prototype));
 
 
-  TableSVG.addMode = function (modeName, func) {
-    var newMode = func(Table, global);
+  TableSVG.addMode = function (modeName, func, parentModeName) {
+    if (parentModeName === undefined) {
+      parent = Table;
+    } else {
+      parent = this.modes[parentModeName];
+    }
+    var newMode = func(parent, global);
     if (!newMode instanceof Table) {
       logger.warn('no inherit Table. please set prototype Table(first argument) modeName:' + modeName);
     }
