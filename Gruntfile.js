@@ -11,7 +11,7 @@ module.exports = function (grunt) {
         report: "min"
       },
       dist: {
-        stc: "<%= concat.target.dest %>",
+        src: "<%= concat.target.dest %>",
         dest: "dist/table.svg-min.js"
       }
     },
@@ -22,25 +22,14 @@ module.exports = function (grunt) {
       target: {
         dest: "dist/table.svg.js",
         src: [
-
+          "src/table.js"
         ]
-      }
-    },
-    traceur: {
-      options: {
-        experimental: true
-      },
-      compile: {
-        files: {
-          'dist/table.svg-min.js': ['src/table.js']
-        }
       }
     }
   });
 
   grunt.loadNpmTasks("grunt-contrib-concat");
   grunt.loadNpmTasks("grunt-contrib-uglify");
-  grunt.loadNpmTasks('grunt-traceur-compiler');
 
-  grunt.registerTask("default", ["traceur"])
+  grunt.registerTask("default", ["concat", "uglify"])
 };
