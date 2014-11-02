@@ -4,6 +4,7 @@ var TableSVG = (function () {
     xhtml: 'http://www.w3.org/2000/xhtml',
     xlink: 'http://www.w3.org/1999/xlink'
   };
+  var utils = {};
 
   function TableSVG() {
   }
@@ -183,7 +184,7 @@ var TableSVG = (function () {
         logger.fatal('no such mode error mode:' + parentModeName);
       }
     }
-    var newMode = func(parent, global, new _());
+    var newMode = func(parent, global, utils);
     if (!newMode instanceof Table) {
       logger.warn('no inherit Table. please set prototype Table(first argument) modeName:' + modeName);
     }
@@ -191,31 +192,27 @@ var TableSVG = (function () {
   };
 
   TableSVG.plugin = function (func) {
-    func(TableSVG, Table, global, new _());
+    func(TableSVG, Table, global, utils);
   };
 
-  function _() {
-  }
-
-  (function (_proto) {
-    _proto.sum = function (arr) {
-      return arr.reduce(function (prev, current, i, arr) {
-        return prev + current;
-      });
-    };
-    _proto.inherit = function (childCon, parentCon) {
-      childCon._parent = parentCon;
-      childCon.prototype = Object.create(parentCon.prototype, {
-        constructor: {
-          value: childCon,
-          enumerable: false,
-          writable: true,
-          configurable: true
-        }
-      })
-    };
-    _proto.logger = logger;
-  })(_.prototype);
+  // utils
+  utils.sum = function (arr) {
+    return arr.reduce(function (prev, current, i, arr) {
+      return prev + current;
+    });
+  };
+  utils.inherit = function (childCon, parentCon) {
+    childCon._parent = parentCon;
+    childCon.prototype = Object.create(parentCon.prototype, {
+      constructor: {
+        value: childCon,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }
+    })
+  };
+  utils.logger = logger;
 
   return TableSVG;
 })();
