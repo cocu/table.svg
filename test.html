@@ -1,0 +1,39 @@
+<html lang="ja">
+<head>
+    <meta charset="utf-8"/>
+    <script src="dependencies/snap.svg.js" type="application/javascript"></script>
+    <script src="src/table.js" type="application/javascript"></script>
+    <script src="src/vertical-table.js" type="application/javascript"></script>
+    <style>
+        .cell{
+            fill: white;
+            stroke: black;
+        }
+        .active{
+            fill:red;
+        }
+        .selecting{
+            fill:blue;
+        }
+    </style>
+</head>
+<body>
+<div id="table">
+</div>
+<script>
+    var VT = TableSVG.getTableClass('vertical-table');
+    var vt = new VT({
+        rootWidth: '400px',
+        rootHeight: '400px',
+        rowHeights: [
+            [10, 20, 30],
+            [20, 20, 20],
+            [30, 20, 10]
+        ],
+        colWidths: [20, 20, 20]
+    });
+    console.log(vt)
+    document.getElementById('table').appendChild(vt.getRootElem())
+</script>
+</body>
+</html>
