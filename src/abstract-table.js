@@ -69,8 +69,10 @@ var TableSVG = (function () {
 
     var that = this;
     global.doc.body.addEventListener('mouseup', function () {
+      if (that.status.isSelecting) {
+        that._activateSelectingCells.call(that)
+      }
       that.status.isSelecting = false;
-      that._activateSelectingCells.call(that)
     });
   }
 
