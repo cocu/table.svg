@@ -5,20 +5,22 @@
     <script src="src/table.js" type="application/javascript"></script>
     <script src="src/vertical-table.js" type="application/javascript"></script>
     <style>
-        .cell{
+        .cell {
             fill: white;
             stroke: black;
         }
-        .active{
-            fill:red;
+
+        .active {
+            fill: red;
         }
-        .selecting{
-            fill:blue;
+
+        .selecting {
+            fill: blue;
         }
     </style>
 </head>
 <body>
-<div id="table">
+<div id="table" style="padding-bottom: 30000px">
 </div>
 <script>
     var VT = TableSVG.getTableClass('vertical-table');
@@ -26,13 +28,16 @@
         rootWidth: '400px',
         rootHeight: '400px',
         rowHeights: [
-            [10, 20, 30],
-            [20, 20, 20],
-            [30, 20, 10]
+            [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
+            [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
+            [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
+            [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
+            [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
+            [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
+            [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
         ],
-        colWidths: [20, 20, 20]
+        colWidths: [20, 20, 20, 20, 20, 20, 20]
     });
-    console.log(vt)
     document.getElementById('table').appendChild(vt.getRootElem())
 </script>
 </body>
