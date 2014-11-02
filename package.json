@@ -1,0 +1,22 @@
+{
+  "name": "table.svg",
+  "version": "0.1.0",
+  "description": "generate table with svg",
+  "main": "./dist/table.svg.js",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:cocu/table.svg.git"
+  },
+  "author": "cocu",
+  "license": "Apache License v2",
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-uglify": "~0.2.0",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-exec": "~0.4.2",
+    "grunt-traceur-compiler": "*",
+    "mocha": "*",
+    "expect.js": "*",
+    "eve": "~0.4.2"
+  }
+}
