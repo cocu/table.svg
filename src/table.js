@@ -65,12 +65,13 @@ var TableSVG = (function () {
     };
 
     this.cells = [];
-    this.table = [];
+    this.table = {};
 
     Snap(rootElem).addClass(this.classes.root);
 
     var that = this;
     global.doc.body.addEventListener('mouseup', function () {
+          that.status.isSelecting = false;
       that._activateSelectingCells.call(that)
     });
   }
@@ -85,11 +86,11 @@ var TableSVG = (function () {
     };
     tlproto._activateSelectingCells = function () {
       this._clearSelectingCells();
-      this._toggleSelectingCellClass(this.classes.active, true);
+      this._toggleSelectingCellClass(this.classes.active);
     };
     tlproto._toggleSelectingCellClass = function (className, flag) {
       if (flag === undefined) {
-        flag = this.cells[this.status.start.row][this.status.start.col].hasClass(className);
+        flag = !this.table[this.status.start.row][this.status.start.col].hasClass(className);
       }
       var that = this;
       this.cells.forEach(function (cell) {
@@ -127,12 +128,6 @@ var TableSVG = (function () {
             redrawSelecting();
           }
           event.preventDefault();
-        },
-        mouseup: function (event) {
-          status.isSelecting = false;
-          saveStatusEnd();
-          that._activateSelectingCells();
-          event.preventDefault();
         }
       }
     };
@@ -150,10 +145,13 @@ var TableSVG = (function () {
       cell.data('row', row);
       cell.data('col', col);
       this.cells.push(cell);
+      if(this.table[row]=== undefined){
+        this.table[row] = {};
+      }
+      this.table[row][col] = cell;
       var handler = this._eventHandlerFactory(col, row);
       cell.node.addEventListener('mousedown', handler.mousedown);
       cell.node.addEventListener('mouseover', handler.mouseover);
-      cell.node.addEventListener('mouseup', handler.mouseup);
       return cell;
     };
     tlproto.generateTable = function () {
