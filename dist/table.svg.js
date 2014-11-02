@@ -17,13 +17,10 @@ var TableSVG = (function () {
   function TableSVG() {
   }
 
-  TableSVG.modes = {table: Table};
+  TableSVG.Mode = {Table: Table};
 
   TableSVG.createElement = function (elemName) {
     return glob.doc.createElementNS(xmlns.svg, elemName)
-  };
-  TableSVG.getTableClass = function (modeName) {
-    return TableSVG.modes[modeName];
   };
 
   TableSVG._ = {};
@@ -187,7 +184,7 @@ var TableSVG = (function () {
     if (parentModeName === undefined) {
       parent = Table;
     } else {
-      parent = TableSVG.modes[parentModeName];
+      parent = TableSVG.Mode[parentModeName];
       if (parent === undefined) {
         logger.fatal('no such mode error mode:' + parentModeName);
       }
@@ -196,7 +193,7 @@ var TableSVG = (function () {
     if (!newMode instanceof Table) {
       logger.warn('no inherit Table. please set prototype Table(first argument) modeName:' + modeName);
     }
-    TableSVG.modes[modeName] = newMode;
+    TableSVG.Mode[modeName] = newMode;
   };
 
   TableSVG.plugin = function (func) {
