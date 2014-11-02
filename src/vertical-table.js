@@ -1,4 +1,4 @@
-TableSVG.addMode('VerticalTable', 'Table', function (Parent, global, _) {
+TableSVG.addMode('VerticalTable', null, function (Parent, global, _) {
   function VerticalTable(args) {
     Parent.call(this);
     var requiredArgs = [

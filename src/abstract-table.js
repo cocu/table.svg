@@ -9,7 +9,7 @@ var TableSVG = (function () {
   function TableSVG() {
   }
 
-  TableSVG.Mode = {Table: Table};
+  TableSVG.Mode = {};
 
   TableSVG.createElement = function (elemName) {
     return glob.doc.createElementNS(xmlns.svg, elemName)
@@ -44,8 +44,8 @@ var TableSVG = (function () {
     };
   })();
 
-  function Table() {
-    // Table constructor
+  function AbstractTable() {
+    // AbstractTable constructor
     var rootElem = Snap(TableSVG.createElement('svg'));
     this.rootElem = rootElem;
 
@@ -169,27 +169,27 @@ var TableSVG = (function () {
     tlproto.isInSelecting = function (cell) {
       throw 'NotImplementedError: isInSelecting';
     };
-  }(Table.prototype));
+  }(AbstractTable.prototype));
 
 
   TableSVG.addMode = function (modeName, parentModeName, func) {
-    if (parentModeName === undefined) {
-      parent = Table;
-    } else {
+    if (parentModeName) {
       parent = TableSVG.Mode[parentModeName];
       if (parent === undefined) {
         logger.fatal('no such mode error mode:' + parentModeName);
       }
+    } else {
+      parent = AbstractTable;
     }
     var newMode = func(parent, global, utils);
-    if (!newMode instanceof Table) {
-      logger.warn('no inherit Table. please set prototype Table(first argument) modeName:' + modeName);
+    if (!newMode instanceof AbstractTable) {
+      logger.warn('no inherit AbstractTable. please set prototype AbstractTable(first argument) modeName:' + modeName);
     }
     TableSVG.Mode[modeName] = newMode;
   };
 
   TableSVG.plugin = function (func) {
-    func(TableSVG, Table, global, utils);
+    func(TableSVG, AbstractTable, global, utils);
   };
 
   // utils
