@@ -64,8 +64,8 @@ var TableSVG = (function () {
     // private methods
     tlproto._clearSelectingCells = function () {
       var col, row;
-      for(row=this.cells.length;row--;){
-        for(col=this.cells[row].length;col--;){
+      for (row = this.cells.length; row--;) {
+        for (col = this.cells[row].length; col--;) {
           this.cells[row][col].removeClass(this.classes.selecting);
         }
       }
@@ -127,6 +127,15 @@ var TableSVG = (function () {
     };
     tlproto.isInSelecting = function (cell, row, col) {
       throw 'NotImplementedException';
+    };
+    tlproto.createCell = function (row, col, width, height) {
+      var cell = Snap(TableSVG.createElement('rect'));
+      cell.attr({
+        width: width,
+        height: height
+      });
+      this.cells[row][col] = cell;
+      return cell;
     };
   }(Table.prototype));
 
