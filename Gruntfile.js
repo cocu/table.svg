@@ -17,7 +17,7 @@ module.exports = function (grunt) {
     },
     concat: {
       options: {
-        banner: "<% banner %>"
+        banner: "<%= banner %>"
       },
       target: {
         dest: "dist/table.svg.js",
