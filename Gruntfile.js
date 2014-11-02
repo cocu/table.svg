@@ -22,7 +22,8 @@ module.exports = function (grunt) {
       target: {
         dest: "dist/table.svg.js",
         src: [
-          "src/abstract-table.js"
+          "src/abstract-table.js",
+          "src/vertical-table.js",
         ]
       }
     }
