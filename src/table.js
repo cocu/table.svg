@@ -5,11 +5,16 @@ var TableSVG = (function () {
     xlink: 'http://www.w3.org/1999/xlink'
   };
 
-  function TableSVG(w, h, options) {
+  function TableSVG() {
   }
+
+  TableSVG.modes = {table: Table};
 
   TableSVG.createElement = function (elemName) {
     return glob.doc.createElementNS(xmlns.svg, elemName)
+  };
+  TableSVG.getTableClass = function (modeName) {
+    return TableSVG.modes[modeName];
   };
 
   TableSVG._ = {};
@@ -23,7 +28,6 @@ var TableSVG = (function () {
     return global.doc.createElementNS(xmlns.svg, elemName);
   };
 
-  TableSVG.modes = {};
   var logger = (function () {
     var log = function (level, s) {
       console.log('[table.svg]' + level + ' ' + s);
@@ -37,38 +41,47 @@ var TableSVG = (function () {
     this.info = function (s) {
       log('[INFO]', s);
     };
+    this.debug = function (s) {
+      log('[DEBUG]', s);
+    };
   })();
 
   function Table() {
     // Table constructor
-    var rootElem = TableSVG.createElement('svg');
+    var rootElem = Snap(TableSVG.createElement('svg'));
     this.rootElem = rootElem;
 
     this.classes = {
       active: 'active',
-      root: 'svg-table'
+      root: 'svg-table',
+      selecting: 'selecting',
+      cell: 'cell'
     };
 
-    this._status = {
+    this.status = {
       start: {col: null, row: null},
       end: {col: null, row: null},
       isSelecting: false
     };
 
+    this.cells = [];
+    this.table = [];
+
     Snap(rootElem).addClass(this.classes.root);
 
-    global.doc.body.addEventListener('mouseup', this._activateSelectingCells);
+    var that = this;
+    global.doc.body.addEventListener('mouseup', function () {
+      that._activateSelectingCells.call(that)
+    });
   }
 
   (function (tlproto) {
     // private methods
     tlproto._clearSelectingCells = function () {
-      var col, row;
-      for (row = this.cells.length; row--;) {
-        for (col = this.cells[row].length; col--;) {
-          this.cells[row][col].removeClass(this.classes.selecting);
-        }
-      }
+      var that = this;
+      this.cells.forEach(function (cell) {
+        cell.removeClass(that.classes.selecting);
+      });
     };
     tlproto._activateSelectingCells = function () {
       this._clearSelectingCells();
@@ -76,21 +89,18 @@ var TableSVG = (function () {
     };
     tlproto._toggleSelectingCellClass = function (className, flag) {
       if (flag === undefined) {
-        flag = this.cells[this._status.start.row][this._status.start.col].hasClass(className);
+        flag = this.cells[this.status.start.row][this.status.start.col].hasClass(className);
       }
-      var row, col;
-      for (row = this.cells.length; row--;) {
-        for (col = this.cells[row].length; col--;) {
-          var cell = this.cells[row][col];
-          if (this.isInSelecting(cell, row, col)) {
-            cell.toggleClass(className, flag);
-          }
+      var that = this;
+      this.cells.forEach(function (cell) {
+        if (that.isInSelecting(cell)) {
+          cell.toggleClass(className, flag)
         }
-      }
+      });
     };
     tlproto._eventHandlerFactory = function (colNo, rowNo) {
       var that = this;
-      var status = this._status;
+      var status = this.status;
       var saveStatusStart = function () {
         status.start.col = colNo;
         status.start.row = rowNo;
@@ -99,17 +109,22 @@ var TableSVG = (function () {
         status.end.col = colNo;
         status.end.row = rowNo;
       };
+      var redrawSelecting = function () {
+        that._toggleSelectingCellClass(that.classes.selecting, true);
+      };
       return {
         mousedown: function (event) {
           saveStatusStart();
+          saveStatusEnd();
           status.isSelecting = true;
+          redrawSelecting();
           event.preventDefault();
         },
         mouseover: function (event) {
           that._clearSelectingCells();
           if (status.isSelecting && event.buttons != 0 && event.which % 2 != 0) {
             saveStatusEnd();
-            that._toggleSelectingCellClass(that.classes.selecting, true);
+            redrawSelecting();
           }
           event.preventDefault();
         },
@@ -123,10 +138,7 @@ var TableSVG = (function () {
     };
     // public methods
     tlproto.getRootElem = function () {
-      return this.rootElem;
-    };
-    tlproto.isInSelecting = function (cell, row, col) {
-      throw 'NotImplementedException';
+      return this.rootElem.node;
     };
     tlproto.createCell = function (row, col, width, height) {
       var cell = Snap(TableSVG.createElement('rect'));
@@ -134,31 +146,67 @@ var TableSVG = (function () {
         width: width,
         height: height
       });
-      this.cells[row][col] = cell;
+      cell.addClass(this.classes.cell);
+      cell.data('row', row);
+      cell.data('col', col);
+      this.cells.push(cell);
+      var handler = this._eventHandlerFactory(col, row);
+      cell.node.addEventListener('mousedown', handler.mousedown);
+      cell.node.addEventListener('mouseover', handler.mouseover);
+      cell.node.addEventListener('mouseup', handler.mouseup);
       return cell;
+    };
+    tlproto.generateTable = function () {
+      throw 'NotImplementedError: generateTable';
+    };
+    tlproto.isInSelecting = function (cell) {
+      throw 'NotImplementedError: isInSelecting';
     };
   }(Table.prototype));
 
 
-  TableSVG.addMode = function (modeName, func, parentModeName) {
+  TableSVG.addMode = function (modeName, parentModeName, func) {
     if (parentModeName === undefined) {
       parent = Table;
     } else {
-      parent = this.modes[parentModeName];
-      if(parent === undefined){
-        logger.fatal('no such mode error mode:'+parentModeName);
+      parent = TableSVG.modes[parentModeName];
+      if (parent === undefined) {
+        logger.fatal('no such mode error mode:' + parentModeName);
       }
     }
-    var newMode = func(parent, global);
+    var newMode = func(parent, global, new _());
     if (!newMode instanceof Table) {
       logger.warn('no inherit Table. please set prototype Table(first argument) modeName:' + modeName);
     }
-    modes[modeName] = newMode;
+    TableSVG.modes[modeName] = newMode;
   };
 
   TableSVG.plugin = function (func) {
-    func(TableSVG, Table, global);
+    func(TableSVG, Table, global, new _());
   };
+
+  function _() {
+  }
+
+  (function (_proto) {
+    _proto.sum = function (arr) {
+      return arr.reduce(function (prev, current, i, arr) {
+        return prev + current;
+      });
+    };
+    _proto.inherit = function (childCon, parentCon) {
+      childCon._parent = parentCon;
+      childCon.prototype = Object.create(parentCon.prototype, {
+        constructor: {
+          value: childCon,
+          enumerable: false,
+          writable: true,
+          configurable: true
+        }
+      })
+    };
+    _proto.logger = logger;
+  })(_.prototype);
 
   return TableSVG;
 })();
