@@ -24,17 +24,24 @@
 <div id="table" style="padding-bottom: 30000px">
 </div>
 <script>
+    var table = new TableSVG.Mode.Table({
+        rootWidth: '400px',
+        rootHeight: '400px',
+        rowHeights: [10, 50, 30, 20],
+        colWidths: [30, 30, 30, 30]
+    });
+    document.getElementById('table').appendChild(table.getRootElem());
     var vt = new TableSVG.Mode.VerticalTable({
         rootWidth: '400px',
         rootHeight: '400px',
         rowHeights: [
-            [20, 20, 20, 20, 20, 20, 20],
-            [20, 20, 20, 20, 20, 20, 20],
-            [20, 20, 20, 20, 20, 20, 20],
-            [20, 20, 20, 20, 20, 20, 20],
-            [20, 20, 20, 20, 20, 20, 20],
-            [20, 20, 20, 20, 20, 20, 20],
-            [20, 20, 20, 20, 20, 20, 20],
+            [20, 20, 20, 20, 20],
+            [20, 20, 20, 20, 20],
+            [20, 20, 20, 20, 20],
+            [20, 20, 20, 20, 20],
+            [20, 20, 20, 20, 20],
+            [20, 20, 20, 20, 20],
+            [20, 20, 20, 20, 20],
         ],
         colWidths: [20, 20, 20, 20, 20, 20, 20]
     });

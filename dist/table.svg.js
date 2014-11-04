@@ -5,14 +5,15 @@
 // Licensed under the Apache License, Version 2.0 (the "License")
 //
 // github: https://github.com/cocu/table.svg
-// build : 2014-11-03
+// build : 2014-11-04
 var TableSVG = (function () {
   var xmlns = {
     svg: 'http://www.w3.org/2000/svg',
     xhtml: 'http://www.w3.org/2000/xhtml',
     xlink: 'http://www.w3.org/1999/xlink'
   };
-  var utils = {};
+  var utils = {},
+    selectMethodGens = {};
 
   function TableSVG() {
   }
@@ -102,7 +103,7 @@ var TableSVG = (function () {
       }
       var that = this;
       this.cells.forEach(function (cell) {
-        if (that.isInSelecting(cell)) {
+        if (that.isInSelecting(cell, that.status)) {
           cell.toggleClass(className, flag)
         }
       });
@@ -202,7 +203,36 @@ var TableSVG = (function () {
     func(TableSVG, AbstractTable, global, utils);
   };
 
+  // selectMethods
+  selectMethodGens = {};
+  selectMethodGens.horizontal = function (colNum) {
+    console.log(colNum)
+    return function (cell, status) {
+      var col = cell.data('col'),
+        row = cell.data('row');
+      var start = status.start.col + status.start.row * colNum;
+      var end = status.end.col + status.end.row * colNum;
+      var curr = col + row * colNum;
+      var min = Math.min(start, end);
+      var max = Math.max(start, end);
+      return min <= curr && curr <= max;
+    };
+  };
+  selectMethodGens.vertical = function (rowNum) {
+    return function (cell, status) {
+      var col = cell.data('col'),
+        row = cell.data('row');
+      var start = status.start.col * rowNum + status.row;
+      var end = status.end.col * rowNum + status.end.row;
+      var curr = col * rowNum + row;
+      var min = Math.min(start, end);
+      var max = Math.max(start, end);
+      return min <= curr && curr <= max;
+    }
+  };
+  
   // utils
+  utils = {};
   utils.sum = function (arr) {
     return arr.reduce(function (prev, current, i, arr) {
       return prev + current;
@@ -219,7 +249,11 @@ var TableSVG = (function () {
       }
     })
   };
+  utils.translate = function (elem, x, y) {
+    elem.transform('translate(' + x + ',' + y + ')')
+  };
   utils.logger = logger;
+  utils.selectMethodGens = selectMethodGens;
 
   return TableSVG;
 })();
@@ -254,6 +288,8 @@ TableSVG.addMode('VerticalTable', null, function (Parent, global, _) {
 
     this.rootElem.node.setAttribute('viewBox', '0 0 ' + this._viewWidth + ' ' + this._viewHeight);
 
+    this.isInSelecting = _.selectMethodGens.horizontal(colNum);
+    
     this._initTable();
   }
 
@@ -267,9 +303,9 @@ TableSVG.addMode('VerticalTable', null, function (Parent, global, _) {
       var x = 0;
       this._colWidths.map(function (width, colNo) {
         var y = 0;
-        var cols = that._rowHeights[colNo].map(function (height, row) {
-          var cell = that.createCell(row, colNo, width, height);
-          cell.transform('translate(0,' + y + ')');
+        var cols = that._rowHeights[colNo].map(function (height, rowNo) {
+          var cell = that.createCell(rowNo, colNo, width, height);
+          _.translate(cell,0,y);
           y += height;
           return cell;
         });
@@ -283,18 +319,70 @@ TableSVG.addMode('VerticalTable', null, function (Parent, global, _) {
       })
     };
     // public methods
-    proto.isInSelecting = function (cell) {
-      // todo fix it
-      var col = cell.data('col'),
-        row = cell.data('row');
-      var start = this.status.start.col + this.status.start.row * this._colNum;
-      var end = this.status.end.col + this.status.end.row * this._colNum;
-      var curr = col + row * this._colNum;
-      var min = Math.min(start, end);
-      var max = Math.max(start, end);
-      return min <= curr && curr <= max;
-    };
   })(VerticalTable.prototype);
 
   return VerticalTable;
+});
+TableSVG.addMode('Table', null, function (Parent, global, utils) {
+  function Table(args) {
+    Parent.call(this);
+    var requiredArgs = [
+      'rowHeights',
+      'colWidths',
+      'rootHeight',
+      'rootWidth'
+    ];
+    var lackArgs = requiredArgs.filter(function (elem) {
+      return args === undefined || args[elem] === undefined
+    }).join(', ');
+    if (lackArgs.length > 0) {
+      throw 'NoRequiredArgument: ' + lackArgs;
+    }
+
+    var rowHeights = args['rowHeights'];
+    var colWidths = args['colWidths'];
+    var rowNum = rowHeights.length;
+    var colNum = colWidths.length;
+    
+    this._colWidths = colWidths;
+    this._rowHeights = rowHeights;
+    this._colNum = colNum;
+    this._rowNum = rowNum;
+    this._viewWidth = utils.sum(colWidths);
+    this._viewHeight = utils.sum(rowHeights);
+
+    this.rootElem.node.setAttribute('viewBox', '0 0 ' + this._viewWidth + ' ' + this._viewHeight);
+
+    this.isInSelecting = utils.selectMethodGens.horizontal(colNum);
+    
+    this._initTable();
+  }
+
+  utils.inherit(Table, Parent);
+  (function (proto) {
+    // private methods
+    proto._initTable = function () {
+      var that =this;
+      var table = this.rootElem;
+      var x = 0;
+      this._colWidths.map(function (width, colNo) {
+        var y = 0;
+        var cols = that._rowHeights.map(function (height, rowNo) {
+          var cell = that.createCell(rowNo, colNo, width, height);
+          utils.translate(cell, 0, y);
+          y += height;
+          return cell;
+        });
+        var col = table.g();
+        cols.map(function (c) {
+          col.add(c);
+        });
+        utils.translate(col, x, 0);
+        x += width;
+        return col;
+      });
+    };
+    // public methods
+  })(Table.prototype);
+  return Table;
 });

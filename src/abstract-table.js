@@ -4,7 +4,8 @@ var TableSVG = (function () {
     xhtml: 'http://www.w3.org/2000/xhtml',
     xlink: 'http://www.w3.org/1999/xlink'
   };
-  var utils = {};
+  var utils = {},
+    selectMethodGens = {};
 
   function TableSVG() {
   }
@@ -94,7 +95,7 @@ var TableSVG = (function () {
       }
       var that = this;
       this.cells.forEach(function (cell) {
-        if (that.isInSelecting(cell)) {
+        if (that.isInSelecting(cell, that.status)) {
           cell.toggleClass(className, flag)
         }
       });
@@ -194,7 +195,36 @@ var TableSVG = (function () {
     func(TableSVG, AbstractTable, global, utils);
   };
 
+  // selectMethods
+  selectMethodGens = {};
+  selectMethodGens.horizontal = function (colNum) {
+    console.log(colNum)
+    return function (cell, status) {
+      var col = cell.data('col'),
+        row = cell.data('row');
+      var start = status.start.col + status.start.row * colNum;
+      var end = status.end.col + status.end.row * colNum;
+      var curr = col + row * colNum;
+      var min = Math.min(start, end);
+      var max = Math.max(start, end);
+      return min <= curr && curr <= max;
+    };
+  };
+  selectMethodGens.vertical = function (rowNum) {
+    return function (cell, status) {
+      var col = cell.data('col'),
+        row = cell.data('row');
+      var start = status.start.col * rowNum + status.row;
+      var end = status.end.col * rowNum + status.end.row;
+      var curr = col * rowNum + row;
+      var min = Math.min(start, end);
+      var max = Math.max(start, end);
+      return min <= curr && curr <= max;
+    }
+  };
+  
   // utils
+  utils = {};
   utils.sum = function (arr) {
     return arr.reduce(function (prev, current, i, arr) {
       return prev + current;
@@ -211,7 +241,11 @@ var TableSVG = (function () {
       }
     })
   };
+  utils.translate = function (elem, x, y) {
+    elem.transform('translate(' + x + ',' + y + ')')
+  };
   utils.logger = logger;
+  utils.selectMethodGens = selectMethodGens;
 
   return TableSVG;
 })();

@@ -24,6 +24,7 @@ module.exports = function (grunt) {
         src: [
           "src/abstract-table.js",
           "src/vertical-table.js",
+          "src/table.js",
         ]
       }
     }
