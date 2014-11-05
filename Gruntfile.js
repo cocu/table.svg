@@ -27,11 +27,16 @@ module.exports = function (grunt) {
           "src/table.js",
         ]
       }
+    },
+    watch:{
+      files: 'src/*.js',
+      tasks:['concat', 'uglify']
     }
   });
 
   grunt.loadNpmTasks("grunt-contrib-concat");
   grunt.loadNpmTasks("grunt-contrib-uglify");
+  grunt.loadNpmTasks("grunt-contrib-watch");
 
   grunt.registerTask("default", ["concat", "uglify"])
 };
