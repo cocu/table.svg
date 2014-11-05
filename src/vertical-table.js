@@ -75,16 +75,17 @@ TableSVG.addMode('VerticalTable', null, function (Parent, global, utils) {
         return col;
       });
 
-      x = 0;
-      var headers = Snap(utils.createElement('g'));
-      this._colWidths.map(function (width, colNo) {
-        var header = that.createColHeader(colNo, width);
-        utils.translate(header, x, 0);
-        x += width;
-        headers.add(header)
-      });
-      table.add(headers);
-
+      if (this._colHeaders) {
+        x = 0;
+        var headers = Snap(utils.createElement('g'));
+        this._colWidths.map(function (width, colNo) {
+          var header = that.createColHeader(colNo, width);
+          utils.translate(header, x, 0);
+          x += width;
+          headers.add(header)
+        });
+        table.add(headers);
+      }
     };
     // public methods
     proto.genColHeaderElem = function (col, width) {

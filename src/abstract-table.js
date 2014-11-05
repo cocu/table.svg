@@ -209,11 +209,8 @@ var TableSVG = (function () {
     tlproto.genColHeaderElem = function (col, width) {
     };
     tlproto.genCellElem = function (row, col, width, height) {
-      var cell = Snap(utils.createElement('rect'));
-      cell.attr({
-        width: width,
-        height: height
-      });
+      var cell = Snap(utils.createElement('g'));
+      cell.rect(0,0,width,height);
       return cell;
     };
     tlproto.generateTable = function () {
@@ -304,7 +301,7 @@ var TableSVG = (function () {
   utils.createElement = function (elemName) {
     return global.doc.createElementNS(xmlns.svg, elemName)
   };
-  utils.checkArgs = function(args, requiredArgs){
+  utils.checkArgs = function(requiredArgs, args){
     var lackArgs = requiredArgs.filter(function (elem) {
       return args === undefined || args[elem] === undefined
     }).join(', ');

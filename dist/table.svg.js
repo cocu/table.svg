@@ -217,11 +217,8 @@ var TableSVG = (function () {
     tlproto.genColHeaderElem = function (col, width) {
     };
     tlproto.genCellElem = function (row, col, width, height) {
-      var cell = Snap(utils.createElement('rect'));
-      cell.attr({
-        width: width,
-        height: height
-      });
+      var cell = Snap(utils.createElement('g'));
+      cell.rect(0,0,width,height);
       return cell;
     };
     tlproto.generateTable = function () {
@@ -312,6 +309,14 @@ var TableSVG = (function () {
   utils.createElement = function (elemName) {
     return global.doc.createElementNS(xmlns.svg, elemName)
   };
+  utils.checkArgs = function(requiredArgs, args){
+    var lackArgs = requiredArgs.filter(function (elem) {
+      return args === undefined || args[elem] === undefined
+    }).join(', ');
+    if (lackArgs.length > 0) {
+      throw 'NoRequiredArgument: ' + lackArgs;
+    }
+  };
   utils.logger = logger;
   utils.selectMode = selectMode;
 
@@ -330,12 +335,7 @@ TableSVG.addMode('VerticalTable', null, function (Parent, global, utils) {
       'colHeaderHeight'
     ];
 
-    var lackArgs = requiredArgs.filter(function (elem) {
-      return args === undefined || args[elem] === undefined
-    }).join(', ');
-    if (lackArgs.length > 0) {
-      throw 'NoRequiredArgument: ' + lackArgs;
-    }
+    utils.checkArgs(requiredArgs, args);
 
     var rowHeights = args['rowHeights'];
     var colWidths = args['colWidths'];
@@ -399,16 +399,17 @@ TableSVG.addMode('VerticalTable', null, function (Parent, global, utils) {
         return col;
       });
 
-      x = 0;
-      var headers = Snap(utils.createElement('g'));
-      this._colWidths.map(function (width, colNo) {
-        var header = that.createColHeader(colNo, width);
-        utils.translate(header, x, 0);
-        x += width;
-        headers.add(header)
-      });
-      table.add(headers);
-
+      if (this._colHeaders) {
+        x = 0;
+        var headers = Snap(utils.createElement('g'));
+        this._colWidths.map(function (width, colNo) {
+          var header = that.createColHeader(colNo, width);
+          utils.translate(header, x, 0);
+          x += width;
+          headers.add(header)
+        });
+        table.add(headers);
+      }
     };
     // public methods
     proto.genColHeaderElem = function (col, width) {
@@ -429,30 +430,35 @@ TableSVG.addMode('Table', null, function (Parent, global, utils) {
       'rootHeight',
       'rootWidth'
     ];
-    var lackArgs = requiredArgs.filter(function (elem) {
-      return args === undefined || args[elem] === undefined
-    }).join(', ');
-    if (lackArgs.length > 0) {
-      throw 'NoRequiredArgument: ' + lackArgs;
-    }
+
+    var optionalArgs = [
+      'colHeaderHeight',
+      'colHeaders'
+    ];
+
+    utils.checkArgs(requiredArgs, args);
 
     var rowHeights = args['rowHeights'];
     var colWidths = args['colWidths'];
     var rootHeight = args['rootHeight'];
     var rootWidth = args['rootWidth'];
-    
+
     var rowNum = rowHeights.length;
     var colNum = colWidths.length;
     var viewWidth = utils.sum(colWidths);
     var viewHeight = utils.sum(rowHeights);
+
+    var colHeaders = args['colHeaders'];
+    this._colHeaders = colHeaders;
     var colHeaderHeight = args['colHeaderHeight'] ? args['colHeaderHeight'] : 0;
-    
+    this._colHeaderHeight = colHeaderHeight;
+
     Parent.call(this, {
       rootHeight: rootHeight,
       rootWidth: rootWidth,
       viewBox: '0 ' + (-colHeaderHeight) + ' ' + viewWidth + ' ' + (colHeaderHeight + viewHeight)
     });
-    
+
     this._colWidths = colWidths;
     this._rowHeights = rowHeights;
     this._colNum = colNum;
@@ -460,8 +466,8 @@ TableSVG.addMode('Table', null, function (Parent, global, utils) {
     this._viewHeight = viewHeight;
     this._viewWidth = viewWidth;
 
-    this.selectMode = utils.selectMode.vertical(rowNum);
-    
+    this.selectMode = utils.selectMode.horizontal(colNum);
+
     this._initTable();
   }
 
@@ -469,7 +475,7 @@ TableSVG.addMode('Table', null, function (Parent, global, utils) {
   (function (proto) {
     // private methods
     proto._initTable = function () {
-      var that =this;
+      var that = this;
       var table = this.rootElem;
       var x = 0;
       this._colWidths.map(function (width, colNo) {
@@ -488,8 +494,98 @@ TableSVG.addMode('Table', null, function (Parent, global, utils) {
         x += width;
         return col;
       });
+
+      if (this._colHeaders) {
+        x = 0;
+        var headers = Snap(utils.createElement('g'));
+        this._colWidths.map(function (width, colNo) {
+          var header = that.createColHeader(colNo, width);
+          utils.translate(header, x, 0);
+          x += width;
+          headers.add(header)
+        });
+        table.add(headers);
+      }
     };
     // public methods
+    proto.genColHeaderElem = function (col, width) {
+      var header = Snap(utils.createElement('g'));
+      header.rect(0, -this._colHeaderHeight, width, this._colHeaderHeight);
+      header.text(width / 2, -this._colHeaderHeight, this._colHeaders[col]);
+      return header;
+    }
   })(Table.prototype);
   return Table;
+});
+TableSVG.addMode('Calendar', 'Table', function (Parent, global, utils) {
+  function Calendar(args) {
+    var requiredArgs = [
+      'startDate',
+      'weekNum',
+      'rootHeight',
+      'rootWidth'
+    ];
+
+    var optionalArgs = [
+      'colHeaderHeight'
+    ];
+
+    utils.checkArgs(requiredArgs, args);
+
+    var rootHeight = args.rootHeight;
+    var rootWidth = args.rootWidth;
+
+    var startDate = args.startDate;
+    var weekNum = args.weekNum;
+    var endDate = new Date(startDate.getTime());
+    endDate.setDate(7 * (weekNum - 1) + endDate.getDate());
+
+    var getLatestMonday = function (date, deltaDate) {
+      if (!deltaDate) {
+        deltaDate = 0
+      }
+      var delta = 7 - (7 + date.getDay() - 1) % 7;
+      var res = new Date(date.getTime());
+      res.setDate(date.getDate() + delta + deltaDate);
+      return res;
+    };
+
+    var tableStartDate = new getLatestMonday(startDate, -7); // Monday
+    var tableEndDate = new getLatestMonday(endDate, -1); // Sunday
+
+    var colHeaderHeight = args.colHeaderHeight ? args.colHeaderHeight : 20;
+    this._colHeaderHeight = colHeaderHeight;
+
+    this._tableStartDate = tableStartDate;
+    this._tableEndDate = tableEndDate;
+
+    (function () {
+      var rowHeights = [];
+      for (var i = weekNum; i--;) {
+        rowHeights.push(30)
+      }
+      Parent.call(this, {
+        colHeaderHeight: colHeaderHeight,
+        colWidths: [40, 40, 40, 40, 40, 40, 40],
+        rowHeights: rowHeights,
+        rootHeight: rootHeight,
+        rootWidth: rootWidth,
+        colHeaders: ['月', '火', '水', '木', '金', '土', '日']
+      });
+    }).call(this);
+  }
+
+  utils.inherit(Calendar, Parent);
+
+  (function (proto) {
+    proto.genCellElem = function (row, col, width, height) {
+      var cell = Snap(utils.createElement('g'));
+      var currDate = new Date(this._tableStartDate.getTime());
+      currDate.setDate(row * 7 + col + currDate.getDate());
+      cell.rect(0, 0, width, height);
+      cell.text(0, 0, currDate.getDate());
+      return cell;
+    }
+  })(Calendar.prototype);
+  return Calendar;
 });

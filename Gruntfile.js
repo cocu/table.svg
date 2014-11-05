@@ -25,6 +25,7 @@ module.exports = function (grunt) {
           "src/abstract-table.js",
           "src/vertical-table.js",
           "src/table.js",
+          "src/calendar.js",
         ]
       }
     },

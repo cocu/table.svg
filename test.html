@@ -6,16 +6,20 @@
     <!--<script src="src/abstract-table.js" type="application/javascript"></script>-->
     <!--<script src="src/vertical-table.js" type="application/javascript"></script>-->
     <style>
-        .cell {
+        .cell rect{
             fill: white;
             stroke: black;
         }
+        .cell text{
+            font-size: 10px;
+            dominant-baseline: text-before-edge;
+        }
 
-        .active {
+        .active rect{
             fill: red;
         }
 
-        .selecting {
+        .selecting rect{
             fill: blue;
         }
         .header rect{
@@ -56,6 +60,13 @@
         colHeaderHeight: 30
     });
     document.getElementById('table').appendChild(vt.getRootElem())
+    var c = new TableSVG.Mode.Calendar({
+        rootWidth: '400px',
+        rootHeight: '400px',
+        startDate: new Date(),
+        weekNum: 4
+    });
+    document.getElementById('table').appendChild(c.getRootElem())
 </script>
 </body>
 </html>
