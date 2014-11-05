@@ -304,6 +304,14 @@ var TableSVG = (function () {
   utils.createElement = function (elemName) {
     return global.doc.createElementNS(xmlns.svg, elemName)
   };
+  utils.checkArgs = function(args, requiredArgs){
+    var lackArgs = requiredArgs.filter(function (elem) {
+      return args === undefined || args[elem] === undefined
+    }).join(', ');
+    if (lackArgs.length > 0) {
+      throw 'NoRequiredArgument: ' + lackArgs;
+    }
+  };
   utils.logger = logger;
   utils.selectMode = selectMode;
 

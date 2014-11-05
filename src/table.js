@@ -6,12 +6,8 @@ TableSVG.addMode('Table', null, function (Parent, global, utils) {
       'rootHeight',
       'rootWidth'
     ];
-    var lackArgs = requiredArgs.filter(function (elem) {
-      return args === undefined || args[elem] === undefined
-    }).join(', ');
-    if (lackArgs.length > 0) {
-      throw 'NoRequiredArgument: ' + lackArgs;
-    }
+
+    utils.checkArgs(requiredArgs, args);
 
     var rowHeights = args['rowHeights'];
     var colWidths = args['colWidths'];
