@@ -5,7 +5,7 @@
 // Licensed under the Apache License, Version 2.0 (the "License")
 //
 // github: https://github.com/cocu/table.svg
-// build : 2014-11-05
+// build : 2014-11-06
 var TableSVG = (function () {
   var xmlns = {
     svg: 'http://www.w3.org/2000/svg',
@@ -433,7 +433,9 @@ TableSVG.addMode('Table', null, function (Parent, global, utils) {
 
     var optionalArgs = [
       'colHeaderHeight',
-      'colHeaders'
+      'colHeaders',
+      'rowHeaderWidth',
+      'rowHeaders'
     ];
 
     utils.checkArgs(requiredArgs, args);
@@ -448,15 +450,18 @@ TableSVG.addMode('Table', null, function (Parent, global, utils) {
     var viewWidth = utils.sum(colWidths);
     var viewHeight = utils.sum(rowHeights);
 
-    var colHeaders = args['colHeaders'];
-    this._colHeaders = colHeaders;
+    this._colHeaders = args['colHeaders'];
     var colHeaderHeight = args['colHeaderHeight'] ? args['colHeaderHeight'] : 0;
     this._colHeaderHeight = colHeaderHeight;
+
+    this._rowHeaders = args['rowHeaders'];
+    var rowHeaderWidth = args['rowHeaderWidth'] ? args['rowHeaderWidth'] : 0;
+    this._rowHeaderWidth = rowHeaderWidth;
 
     Parent.call(this, {
       rootHeight: rootHeight,
       rootWidth: rootWidth,
-      viewBox: '0 ' + (-colHeaderHeight) + ' ' + viewWidth + ' ' + (colHeaderHeight + viewHeight)
+      viewBox: '' + (-rowHeaderWidth) + ' ' + (-colHeaderHeight) + ' ' + (viewWidth + rowHeaderWidth) + ' ' + (colHeaderHeight + viewHeight)
     });
 
     this._colWidths = colWidths;
@@ -477,9 +482,10 @@ TableSVG.addMode('Table', null, function (Parent, global, utils) {
     proto._initTable = function () {
       var that = this;
       var table = this.rootElem;
-      var x = 0;
+      var x, y;
+      x = 0;
       this._colWidths.map(function (width, colNo) {
-        var y = 0;
+        y = 0;
         var cols = that._rowHeights.map(function (height, rowNo) {
           var cell = that.createCell(rowNo, colNo, width, height);
           utils.translate(cell, 0, y);
@@ -495,15 +501,35 @@ TableSVG.addMode('Table', null, function (Parent, global, utils) {
         return col;
       });
 
-      if (this._colHeaders) {
-        x = 0;
+      if (this._colHeaders || this._rowHeaders) {
         var headers = Snap(utils.createElement('g'));
-        this._colWidths.map(function (width, colNo) {
-          var header = that.createColHeader(colNo, width);
-          utils.translate(header, x, 0);
-          x += width;
-          headers.add(header)
-        });
+        if (this._colHeaders && this._rowHeaders) {
+          var header = headers.g();
+          header.rect(-this._rowHeaderWidth, -this._colHeaderHeight, this._rowHeaderWidth, this._colHeaderHeight);
+          header.addClass(this.classes.header);
+        }
+        if (this._colHeaders) {
+          x = 0;
+          var colHeaders = Snap(utils.createElement('g'));
+          this._colWidths.map(function (width, colNo) {
+            var header = that.createColHeader(colNo, width);
+            utils.translate(header, x, 0);
+            x += width;
+            colHeaders.add(header);
+          });
+          headers.add(colHeaders);
+        }
+        if (this._rowHeaders) {
+          y = 0;
+          var rowHeaders = Snap(utils.createElement('g'));
+          this._rowHeights.map(function (height, rowNo) {
+            var header = that.createRowHeader(rowNo, height);
+            utils.translate(header, 0, y);
+            y += height;
+            rowHeaders.add(header);
+          });
+          headers.add(rowHeaders);
+        }
         table.add(headers);
       }
     };
@@ -512,6 +538,12 @@ TableSVG.addMode('Table', null, function (Parent, global, utils) {
       var header = Snap(utils.createElement('g'));
       header.rect(0, -this._colHeaderHeight, width, this._colHeaderHeight);
       header.text(width / 2, -this._colHeaderHeight, this._colHeaders[col]);
+      return header;
+    };
+    proto.genRowHeaderElem = function (row, height) {
+      var header = Snap(utils.createElement('g'));
+      header.rect(-this._rowHeaderWidth, 0, this._rowHeaderWidth, height);
+      header.text(-this._rowHeaderWidth / 2, height / 2, this._rowHeaders[row]);
       return header;
     }
   })(Table.prototype);
