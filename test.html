@@ -18,6 +18,14 @@
         .selecting {
             fill: blue;
         }
+        .header rect{
+            fill: pink;
+            stroke: red;
+        }
+        .header text{
+            text-anchor: middle;
+            dominant-baseline: text-before-edge;
+        }
     </style>
 </head>
 <body>
@@ -43,7 +51,9 @@
             [20, 20, 20, 20, 20],
             [20, 20, 20, 20, 20],
         ],
-        colWidths: [20, 20, 20, 20, 20, 20, 20]
+        colHeaders: ['あ', 'い', 'う', 'え'],
+        colWidths: [20, 20, 20, 20, 20, 20, 20],
+        colHeaderHeight: 30
     });
     document.getElementById('table').appendChild(vt.getRootElem())
 </script>

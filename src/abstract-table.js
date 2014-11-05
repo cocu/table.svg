@@ -12,10 +12,6 @@ var TableSVG = (function () {
 
   TableSVG.Mode = {};
 
-  TableSVG.createElement = function (elemName) {
-    return glob.doc.createElementNS(xmlns.svg, elemName)
-  };
-
   TableSVG._ = {};
   var global = {
     xmlns: xmlns,
@@ -45,10 +41,19 @@ var TableSVG = (function () {
     };
   })();
 
-  function AbstractTable() {
+  function AbstractTable(args) {
     // AbstractTable constructor
-    var rootElem = Snap(TableSVG.createElement('svg'));
-    this.rootElem = rootElem;
+    var requiredArgs = [
+      'rootWidth', // 2-Dim array (colWidths.length x eachCellHeightInTheCol)
+      'rootHeight',
+      'viewBox'
+    ];
+    var lackArgs = requiredArgs.filter(function (elem) {
+      return args === undefined || args[elem] === undefined
+    }).join(', ');
+    if (lackArgs.length > 0) {
+      throw 'NoRequiredArgument: ' + lackArgs;
+    }
 
     this.classes = {
       active: 'active',
@@ -59,6 +64,8 @@ var TableSVG = (function () {
       colHeader: 'col-header',
       header: 'header'
     };
+
+    this.rootElem = this._initRootElem(args.rootWidth, args.rootHeight, args.viewBox);
 
     this.status = {
       start: {col: null, row: null},
@@ -73,8 +80,6 @@ var TableSVG = (function () {
       col: {}
     };
 
-    Snap(rootElem).addClass(this.classes.root);
-
     var that = this;
     global.doc.body.addEventListener('mouseup', function () {
       if (that.status.isSelecting) {
@@ -86,6 +91,14 @@ var TableSVG = (function () {
 
   (function (tlproto) {
     // private methods
+    tlproto._initRootElem = function (width, height, viewBox) {
+      var rootElem = Snap(utils.createElement('svg'));
+      rootElem.node.setAttribute('viewBox', viewBox);
+      rootElem.node.setAttribute('height', height);
+      rootElem.node.setAttribute('width', width);
+      rootElem.addClass(this.classes.root);
+      return rootElem;
+    };
     tlproto._clearSelectingCells = function () {
       var that = this;
       this.cells.forEach(function (cell) {
@@ -158,11 +171,13 @@ var TableSVG = (function () {
     };
     tlproto._registerRowHeader = function (header, row) {
       header.addClass(this.classes.rowHeader);
+      header.addClass(this.classes.header);
       header.data('row', row);
       this.header.row[row] = header;
     };
     tlproto._registerColHeader = function (header, col) {
       header.addClass(this.classes.colHeader);
+      header.addClass(this.classes.header);
       header.data('col', col);
       this.header.col[col] = header;
     };
@@ -179,10 +194,12 @@ var TableSVG = (function () {
     tlproto.createRowHeader = function (row, height) {
       var header = this.genRowHeaderElem(row, height);
       this._registerRowHeader(header, row);
+      return header;
     };
     tlproto.createColHeader = function (col, width) {
-      var header = this.genRowHeaderElem(row, height);
-      this._registerRowHeader(header, row);
+      var header = this.genColHeaderElem(col, width);
+      this._registerColHeader(header, col);
+      return header;
     };
     tlproto.getRootElem = function () {
       return this.rootElem.node;
@@ -192,7 +209,7 @@ var TableSVG = (function () {
     tlproto.genColHeaderElem = function (col, width) {
     };
     tlproto.genCellElem = function (row, col, width, height) {
-      var cell = Snap(TableSVG.createElement('rect'));
+      var cell = Snap(utils.createElement('rect'));
       cell.attr({
         width: width,
         height: height
@@ -283,6 +300,9 @@ var TableSVG = (function () {
   };
   utils.translate = function (elem, x, y) {
     elem.transform('translate(' + x + ',' + y + ')')
+  };
+  utils.createElement = function (elemName) {
+    return global.doc.createElementNS(xmlns.svg, elemName)
   };
   utils.logger = logger;
   utils.selectMode = selectMode;

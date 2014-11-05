@@ -1,6 +1,5 @@
 TableSVG.addMode('Table', null, function (Parent, global, utils) {
   function Table(args) {
-    Parent.call(this);
     var requiredArgs = [
       'rowHeights',
       'colWidths',
@@ -16,17 +15,27 @@ TableSVG.addMode('Table', null, function (Parent, global, utils) {
 
     var rowHeights = args['rowHeights'];
     var colWidths = args['colWidths'];
+    var rootHeight = args['rootHeight'];
+    var rootWidth = args['rootWidth'];
+    
     var rowNum = rowHeights.length;
     var colNum = colWidths.length;
+    var viewWidth = utils.sum(colWidths);
+    var viewHeight = utils.sum(rowHeights);
+    var colHeaderHeight = args['colHeaderHeight'] ? args['colHeaderHeight'] : 0;
+    
+    Parent.call(this, {
+      rootHeight: rootHeight,
+      rootWidth: rootWidth,
+      viewBox: '0 ' + (-colHeaderHeight) + ' ' + viewWidth + ' ' + (colHeaderHeight + viewHeight)
+    });
     
     this._colWidths = colWidths;
     this._rowHeights = rowHeights;
     this._colNum = colNum;
     this._rowNum = rowNum;
-    this._viewWidth = utils.sum(colWidths);
-    this._viewHeight = utils.sum(rowHeights);
-
-    this.rootElem.node.setAttribute('viewBox', '0 0 ' + this._viewWidth + ' ' + this._viewHeight);
+    this._viewHeight = viewHeight;
+    this._viewWidth = viewWidth;
 
     this.selectMode = utils.selectMode.vertical(rowNum);
     

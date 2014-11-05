@@ -20,10 +20,6 @@ var TableSVG = (function () {
 
   TableSVG.Mode = {};
 
-  TableSVG.createElement = function (elemName) {
-    return glob.doc.createElementNS(xmlns.svg, elemName)
-  };
-
   TableSVG._ = {};
   var global = {
     xmlns: xmlns,
@@ -53,10 +49,19 @@ var TableSVG = (function () {
     };
   })();
 
-  function AbstractTable() {
+  function AbstractTable(args) {
     // AbstractTable constructor
-    var rootElem = Snap(TableSVG.createElement('svg'));
-    this.rootElem = rootElem;
+    var requiredArgs = [
+      'rootWidth', // 2-Dim array (colWidths.length x eachCellHeightInTheCol)
+      'rootHeight',
+      'viewBox'
+    ];
+    var lackArgs = requiredArgs.filter(function (elem) {
+      return args === undefined || args[elem] === undefined
+    }).join(', ');
+    if (lackArgs.length > 0) {
+      throw 'NoRequiredArgument: ' + lackArgs;
+    }
 
     this.classes = {
       active: 'active',
@@ -67,6 +72,8 @@ var TableSVG = (function () {
       colHeader: 'col-header',
       header: 'header'
     };
+
+    this.rootElem = this._initRootElem(args.rootWidth, args.rootHeight, args.viewBox);
 
     this.status = {
       start: {col: null, row: null},
@@ -81,8 +88,6 @@ var TableSVG = (function () {
       col: {}
     };
 
-    Snap(rootElem).addClass(this.classes.root);
-
     var that = this;
     global.doc.body.addEventListener('mouseup', function () {
       if (that.status.isSelecting) {
@@ -94,6 +99,14 @@ var TableSVG = (function () {
 
   (function (tlproto) {
     // private methods
+    tlproto._initRootElem = function (width, height, viewBox) {
+      var rootElem = Snap(utils.createElement('svg'));
+      rootElem.node.setAttribute('viewBox', viewBox);
+      rootElem.node.setAttribute('height', height);
+      rootElem.node.setAttribute('width', width);
+      rootElem.addClass(this.classes.root);
+      return rootElem;
+    };
     tlproto._clearSelectingCells = function () {
       var that = this;
       this.cells.forEach(function (cell) {
@@ -166,11 +179,13 @@ var TableSVG = (function () {
     };
     tlproto._registerRowHeader = function (header, row) {
       header.addClass(this.classes.rowHeader);
+      header.addClass(this.classes.header);
       header.data('row', row);
       this.header.row[row] = header;
     };
     tlproto._registerColHeader = function (header, col) {
       header.addClass(this.classes.colHeader);
+      header.addClass(this.classes.header);
       header.data('col', col);
       this.header.col[col] = header;
     };
@@ -187,10 +202,12 @@ var TableSVG = (function () {
     tlproto.createRowHeader = function (row, height) {
       var header = this.genRowHeaderElem(row, height);
       this._registerRowHeader(header, row);
+      return header;
     };
     tlproto.createColHeader = function (col, width) {
-      var header = this.genRowHeaderElem(row, height);
-      this._registerRowHeader(header, row);
+      var header = this.genColHeaderElem(col, width);
+      this._registerColHeader(header, col);
+      return header;
     };
     tlproto.getRootElem = function () {
       return this.rootElem.node;
@@ -200,7 +217,7 @@ var TableSVG = (function () {
     tlproto.genColHeaderElem = function (col, width) {
     };
     tlproto.genCellElem = function (row, col, width, height) {
-      var cell = Snap(TableSVG.createElement('rect'));
+      var cell = Snap(utils.createElement('rect'));
       cell.attr({
         width: width,
         height: height
@@ -292,20 +309,27 @@ var TableSVG = (function () {
   utils.translate = function (elem, x, y) {
     elem.transform('translate(' + x + ',' + y + ')')
   };
+  utils.createElement = function (elemName) {
+    return global.doc.createElementNS(xmlns.svg, elemName)
+  };
   utils.logger = logger;
   utils.selectMode = selectMode;
 
   return TableSVG;
 })();
-TableSVG.addMode('VerticalTable', null, function (Parent, global, _) {
+TableSVG.addMode('VerticalTable', null, function (Parent, global, utils) {
   function VerticalTable(args) {
-    Parent.call(this);
     var requiredArgs = [
       'rowHeights', // 2-Dim array (colWidths.length x eachCellHeightInTheCol)
       'colWidths',
       'rootHeight',
       'rootWidth'
     ];
+    var optionalArgs = [
+      'colHeaders',
+      'colHeaderHeight'
+    ];
+
     var lackArgs = requiredArgs.filter(function (elem) {
       return args === undefined || args[elem] === undefined
     }).join(', ');
@@ -315,25 +339,42 @@ TableSVG.addMode('VerticalTable', null, function (Parent, global, _) {
 
     var rowHeights = args['rowHeights'];
     var colWidths = args['colWidths'];
+    var rootHeight = args['rootHeight'];
+    var rootWidth = args['rootWidth'];
+
+    var viewWidth = utils.sum(colWidths);
+    var viewHeight = Math.max.apply(null, rowHeights.map(utils.sum));
+
+    var colHeaders = args['colHeaders'];
+    var colHeaderHeight = args['colHeaderHeight'] ? args['colHeaderHeight'] : 0;
+
+    Parent.call(this, {
+      rootHeight: rootHeight,
+      rootWidth: rootWidth,
+      viewBox: '0 ' + (-colHeaderHeight) + ' ' + viewWidth + ' ' + (colHeaderHeight + viewHeight)
+    });
     var colNum = colWidths.length;
     if (colNum !== rowHeights.length) {
       throw 'no match the number of col and row, col:' + colNum + ' row:' + row.length;
     }
 
+    this._rootHeight = rootHeight;
+    this._rootWidth = rootWidth;
     this._colNum = colNum;
     this._rowHeights = rowHeights;
     this._colWidths = colWidths;
-    this._viewWidth = _.sum(colWidths);
-    this._viewHeight = Math.max.apply(null, rowHeights.map(_.sum));
+    this._viewWidth = viewWidth;
+    this._viewHeight = viewHeight;
+    this._colHeaders = colHeaders;
+    this._colHeaderHeight = colHeaderHeight;
 
-    this.rootElem.node.setAttribute('viewBox', '0 0 ' + this._viewWidth + ' ' + this._viewHeight);
 
-    this.selectMode = _.selectMode.horizontal(colNum);
-    
+    this.selectMode = utils.selectMode.horizontal(colNum);
+
     this._initTable();
   }
 
-  _.inherit(VerticalTable, Parent);
+  utils.inherit(VerticalTable, Parent);
 
   (function (proto) {
     // private methods
@@ -345,7 +386,7 @@ TableSVG.addMode('VerticalTable', null, function (Parent, global, _) {
         var y = 0;
         var cols = that._rowHeights[colNo].map(function (height, rowNo) {
           var cell = that.createCell(rowNo, colNo, width, height);
-          _.translate(cell,0,y);
+          utils.translate(cell, 0, y);
           y += height;
           return cell;
         });
@@ -353,19 +394,35 @@ TableSVG.addMode('VerticalTable', null, function (Parent, global, _) {
         cols.map(function (c) {
           col.add(c)
         });
-        col.transform('translate(' + x + ',0)');
+        utils.translate(col, x, 0);
         x += width;
         return col;
-      })
+      });
+
+      x = 0;
+      var headers = Snap(utils.createElement('g'));
+      this._colWidths.map(function (width, colNo) {
+        var header = that.createColHeader(colNo, width);
+        utils.translate(header, x, 0);
+        x += width;
+        headers.add(header)
+      });
+      table.add(headers);
+
     };
     // public methods
+    proto.genColHeaderElem = function (col, width) {
+      var header = Snap(utils.createElement('g'));
+      header.rect(0, -this._colHeaderHeight, width, this._colHeaderHeight);
+      header.text(width / 2, -this._colHeaderHeight, this._colHeaders[col]);
+      return header;
+    }
   })(VerticalTable.prototype);
 
   return VerticalTable;
 });
 TableSVG.addMode('Table', null, function (Parent, global, utils) {
   function Table(args) {
-    Parent.call(this);
     var requiredArgs = [
       'rowHeights',
       'colWidths',
@@ -381,17 +438,27 @@ TableSVG.addMode('Table', null, function (Parent, global, utils) {
 
     var rowHeights = args['rowHeights'];
     var colWidths = args['colWidths'];
+    var rootHeight = args['rootHeight'];
+    var rootWidth = args['rootWidth'];
+    
     var rowNum = rowHeights.length;
     var colNum = colWidths.length;
+    var viewWidth = utils.sum(colWidths);
+    var viewHeight = utils.sum(rowHeights);
+    var colHeaderHeight = args['colHeaderHeight'] ? args['colHeaderHeight'] : 0;
+    
+    Parent.call(this, {
+      rootHeight: rootHeight,
+      rootWidth: rootWidth,
+      viewBox: '0 ' + (-colHeaderHeight) + ' ' + viewWidth + ' ' + (colHeaderHeight + viewHeight)
+    });
     
     this._colWidths = colWidths;
     this._rowHeights = rowHeights;
     this._colNum = colNum;
     this._rowNum = rowNum;
-    this._viewWidth = utils.sum(colWidths);
-    this._viewHeight = utils.sum(rowHeights);
-
-    this.rootElem.node.setAttribute('viewBox', '0 0 ' + this._viewWidth + ' ' + this._viewHeight);
+    this._viewHeight = viewHeight;
+    this._viewWidth = viewWidth;
 
     this.selectMode = utils.selectMode.vertical(rowNum);
     
