@@ -4,8 +4,8 @@ var TableSVG = (function () {
     xhtml: 'http://www.w3.org/2000/xhtml',
     xlink: 'http://www.w3.org/1999/xlink'
   };
-  var utils = {},
-    selectMethodGens = {};
+  var utils = {};
+  var selectMode = {};
 
   function TableSVG() {
   }
@@ -93,9 +93,10 @@ var TableSVG = (function () {
       if (flag === undefined) {
         flag = !this.table[this.status.start.row][this.status.start.col].hasClass(className);
       }
+      this.selectMode.updateStatus(this.status);
       var that = this;
       this.cells.forEach(function (cell) {
-        if (that.isInSelecting(cell, that.status)) {
+        if (that.selectMode.isInSelecting(cell, that.status)) {
           cell.toggleClass(className, flag)
         }
       });
@@ -196,33 +197,40 @@ var TableSVG = (function () {
   };
 
   // selectMethods
-  selectMethodGens = {};
-  selectMethodGens.horizontal = function (colNum) {
-    console.log(colNum)
-    return function (cell, status) {
-      var col = cell.data('col'),
-        row = cell.data('row');
-      var start = status.start.col + status.start.row * colNum;
-      var end = status.end.col + status.end.row * colNum;
-      var curr = col + row * colNum;
-      var min = Math.min(start, end);
-      var max = Math.max(start, end);
-      return min <= curr && curr <= max;
-    };
-  };
-  selectMethodGens.vertical = function (rowNum) {
-    return function (cell, status) {
-      var col = cell.data('col'),
-        row = cell.data('row');
-      var start = status.start.col * rowNum + status.row;
-      var end = status.end.col * rowNum + status.end.row;
-      var curr = col * rowNum + row;
-      var min = Math.min(start, end);
-      var max = Math.max(start, end);
-      return min <= curr && curr <= max;
+  selectMode = {};
+  selectMode.horizontal = function (colNum) {
+    return {
+      updateStatus: function (status) {
+        var start = status.start.col + status.start.row * colNum;
+        var end = status.end.col + status.end.row * colNum;
+        status.min = Math.min(start, end);
+        status.max = Math.max(start, end);
+      },
+      isInSelecting: function (cell, status) {
+        var col = cell.data('col');
+        var row = cell.data('row');
+        var curr = col + row * colNum;
+        return status.min <= curr && curr <= status.max;
+      }
     }
   };
-  
+  selectMode.vertical = function (rowNum) {
+    return {
+      updateStatus: function (status) {
+        var start = status.start.col * rowNum + status.start.row;
+        var end = status.end.col * rowNum + status.end.row;
+        status.min = Math.min(start, end);
+        status.max = Math.max(start, end);
+      },
+      isInSelecting: function (cell, status) {
+        var col = cell.data('col');
+        var row = cell.data('row');
+        var curr = col * rowNum + row;
+        return status.min <= curr && curr <= status.max;
+      }
+    }
+  };
+
   // utils
   utils = {};
   utils.sum = function (arr) {
@@ -245,7 +253,7 @@ var TableSVG = (function () {
     elem.transform('translate(' + x + ',' + y + ')')
   };
   utils.logger = logger;
-  utils.selectMethodGens = selectMethodGens;
+  utils.selectMode = selectMode;
 
   return TableSVG;
 })();

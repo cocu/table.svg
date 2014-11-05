@@ -28,7 +28,7 @@ TableSVG.addMode('Table', null, function (Parent, global, utils) {
 
     this.rootElem.node.setAttribute('viewBox', '0 0 ' + this._viewWidth + ' ' + this._viewHeight);
 
-    this.isInSelecting = utils.selectMethodGens.horizontal(colNum);
+    this.selectMode = utils.selectMode.vertical(rowNum);
     
     this._initTable();
   }

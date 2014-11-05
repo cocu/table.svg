@@ -29,7 +29,7 @@ TableSVG.addMode('VerticalTable', null, function (Parent, global, _) {
 
     this.rootElem.node.setAttribute('viewBox', '0 0 ' + this._viewWidth + ' ' + this._viewHeight);
 
-    this.isInSelecting = _.selectMethodGens.horizontal(colNum);
+    this.selectMode = _.selectMode.horizontal(colNum);
     
     this._initTable();
   }
