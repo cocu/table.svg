@@ -62,7 +62,10 @@ var TableSVG = (function () {
       active: 'active',
       root: 'svg-table',
       selecting: 'selecting',
-      cell: 'cell'
+      cell: 'cell',
+      rowHeader: 'row-header',
+      colHeader: 'col-header',
+      header: 'header'
     };
 
     this.status = {
@@ -73,6 +76,10 @@ var TableSVG = (function () {
 
     this.cells = [];
     this.table = {};
+    this.header = {
+      row: {},
+      col: {}
+    };
 
     Snap(rootElem).addClass(this.classes.root);
 
@@ -141,25 +148,7 @@ var TableSVG = (function () {
         }
       }
     };
-    // public methods
-    tlproto.getRootElem = function () {
-      return this.rootElem.node;
-    };
-    tlproto.createCell = function (row, col, width, height) {
-      var cell = this.genCellElem(row, col, width, height);
-      this.registerCellToTable(cell, row, col);
-      this.setCellHandlers(cell, row, col);
-      return cell;
-    };
-    tlproto.genCellElem = function (row, col, width, height) {
-      var cell = Snap(TableSVG.createElement('rect'));
-      cell.attr({
-        width: width,
-        height: height
-      });
-      return cell;
-    };
-    tlproto.registerCellToTable = function (cell, row, col) {
+    tlproto._registerCell = function (cell, row, col) {
       cell.addClass(this.classes.cell);
       cell.data('row', row);
       cell.data('col', col);
@@ -169,10 +158,53 @@ var TableSVG = (function () {
       }
       this.table[row][col] = cell;
     };
-    tlproto.setCellHandlers = function (cell, row, col) {
+    tlproto._setCellHandlers = function (cell, row, col) {
       var handler = this._eventHandlerFactory(col, row);
       cell.node.addEventListener('mousedown', handler.mousedown);
       cell.node.addEventListener('mouseover', handler.mouseover);
+      return cell;
+    };
+    tlproto._registerRowHeader = function (header, row) {
+      header.addClass(this.classes.rowHeader);
+      header.data('row', row);
+      this.header.row[row] = header;
+    };
+    tlproto._registerColHeader = function (header, col) {
+      header.addClass(this.classes.colHeader);
+      header.data('col', col);
+      this.header.col[col] = header;
+    };
+    // public methods
+    tlproto.getRootElem = function () {
+      return this.rootElem.node;
+    };
+    tlproto.createCell = function (row, col, width, height) {
+      var cell = this.genCellElem(row, col, width, height);
+      this._registerCell(cell, row, col);
+      this._setCellHandlers(cell, row, col);
+      return cell;
+    };
+    tlproto.createRowHeader = function (row, height) {
+      var header = this.genRowHeaderElem(row, height);
+      this._registerRowHeader(header, row);
+    };
+    tlproto.createColHeader = function (col, width) {
+      var header = this.genRowHeaderElem(row, height);
+      this._registerRowHeader(header, row);
+    };
+    tlproto.getRootElem = function () {
+      return this.rootElem.node;
+    };
+    tlproto.genRowHeaderElem = function (row, height) {
+    };
+    tlproto.genColHeaderElem = function (col, width) {
+    };
+    tlproto.genCellElem = function (row, col, width, height) {
+      var cell = Snap(TableSVG.createElement('rect'));
+      cell.attr({
+        width: width,
+        height: height
+      });
       return cell;
     };
     tlproto.generateTable = function () {
