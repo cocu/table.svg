@@ -5,7 +5,7 @@
 // Licensed under the Apache License, Version 2.0 (the "License")
 //
 // github: https://github.com/cocu/table.svg
-// build : 2014-11-05
+// build : 2014-11-06
 var TableSVG = (function () {
   var xmlns = {
     svg: 'http://www.w3.org/2000/svg',
@@ -570,7 +570,7 @@ TableSVG.addMode('Calendar', 'Table', function (Parent, global, utils) {
         rowHeights: rowHeights,
         rootHeight: rootHeight,
         rootWidth: rootWidth,
-        colHeaders: ['月', '火', '水', '木', '金', '土', '日']
+        colHeaders: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
       });
     }).call(this);
   }

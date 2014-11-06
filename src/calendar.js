@@ -51,7 +51,7 @@ TableSVG.addMode('Calendar', 'Table', function (Parent, global, utils) {
         rowHeights: rowHeights,
         rootHeight: rootHeight,
         rootWidth: rootWidth,
-        colHeaders: ['月', '火', '水', '木', '金', '土', '日']
+        colHeaders: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
       });
     }).call(this);
   }
