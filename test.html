@@ -26,9 +26,14 @@
             fill: pink;
             stroke: red;
         }
-        .header text{
+        .col-header text{
             text-anchor: middle;
             dominant-baseline: text-before-edge;
+        }
+        .row-header text{
+            text-anchor: middle;
+            dominant-baseline: middle;
+            font-size: 10px;
         }
     </style>
 </head>
@@ -40,7 +45,11 @@
         rootWidth: '400px',
         rootHeight: '400px',
         rowHeights: [10, 50, 30, 20],
-        colWidths: [30, 30, 30, 30]
+        colWidths: [30, 30, 30, 30],
+        rowHeaderWidth: 30,
+        rowHeaders: ['1','2','3','4'],
+        colHeaderHeight: 30,
+        colHeaders: ['1','2','3','4']
     });
     document.getElementById('table').appendChild(table.getRootElem());
     var vt = new TableSVG.Mode.VerticalTable({
@@ -53,7 +62,7 @@
             [20, 20, 20, 20, 20],
             [20, 20, 20, 20, 20],
             [20, 20, 20, 20, 20],
-            [20, 20, 20, 20, 20],
+            [20, 20, 20, 20, 20]
         ],
         colHeaders: ['あ', 'い', 'う', 'え'],
         colWidths: [20, 20, 20, 20, 20, 20, 20],
