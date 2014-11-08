@@ -204,13 +204,19 @@ var TableSVG = (function () {
     tlproto.getRootElem = function () {
       return this.rootElem.node;
     };
+    tlproto.getActiveCells = function () {
+      var activeClass = this.classes.active;
+      return this.cells.filter(function (cell) {
+        return cell.hasClass(activeClass);
+      });
+    };
     tlproto.genRowHeaderElem = function (row, height) {
     };
     tlproto.genColHeaderElem = function (col, width) {
     };
     tlproto.genCellElem = function (row, col, width, height) {
       var cell = Snap(utils.createElement('g'));
-      cell.rect(0,0,width,height);
+      cell.rect(0, 0, width, height);
       return cell;
     };
     tlproto.generateTable = function () {
@@ -301,12 +307,21 @@ var TableSVG = (function () {
   utils.createElement = function (elemName) {
     return global.doc.createElementNS(xmlns.svg, elemName)
   };
-  utils.checkArgs = function(requiredArgs, args){
+  utils.checkArgs = function (requiredArgs, args) {
     var lackArgs = requiredArgs.filter(function (elem) {
       return args === undefined || args[elem] === undefined
     }).join(', ');
     if (lackArgs.length > 0) {
       throw 'NoRequiredArgument: ' + lackArgs;
+    }
+  };
+  /**
+   * @param {object} target
+   * @param {object} source
+   */
+  utils.hashMerge = function (target, source) {
+    for (var key in source) {
+      target[key] = source[key];
     }
   };
   utils.logger = logger;

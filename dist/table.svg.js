@@ -5,7 +5,7 @@
 // Licensed under the Apache License, Version 2.0 (the "License")
 //
 // github: https://github.com/cocu/table.svg
-// build : 2014-11-06
+// build : 2014-11-08
 var TableSVG = (function () {
   var xmlns = {
     svg: 'http://www.w3.org/2000/svg',
@@ -212,13 +212,19 @@ var TableSVG = (function () {
     tlproto.getRootElem = function () {
       return this.rootElem.node;
     };
+    tlproto.getActiveCells = function () {
+      var activeClass = this.classes.active;
+      return this.cells.filter(function (cell) {
+        return cell.hasClass(activeClass);
+      });
+    };
     tlproto.genRowHeaderElem = function (row, height) {
     };
     tlproto.genColHeaderElem = function (col, width) {
     };
     tlproto.genCellElem = function (row, col, width, height) {
       var cell = Snap(utils.createElement('g'));
-      cell.rect(0,0,width,height);
+      cell.rect(0, 0, width, height);
       return cell;
     };
     tlproto.generateTable = function () {
@@ -309,12 +315,21 @@ var TableSVG = (function () {
   utils.createElement = function (elemName) {
     return global.doc.createElementNS(xmlns.svg, elemName)
   };
-  utils.checkArgs = function(requiredArgs, args){
+  utils.checkArgs = function (requiredArgs, args) {
     var lackArgs = requiredArgs.filter(function (elem) {
       return args === undefined || args[elem] === undefined
     }).join(', ');
     if (lackArgs.length > 0) {
       throw 'NoRequiredArgument: ' + lackArgs;
+    }
+  };
+  /**
+   * @param {object} target
+   * @param {object} source
+   */
+  utils.hashMerge = function (target, source) {
+    for (var key in source) {
+      target[key] = source[key];
     }
   };
   utils.logger = logger;
@@ -582,8 +597,8 @@ TableSVG.addMode('Calendar', 'Table', function (Parent, global, utils) {
       return res;
     };
 
-    var tableStartDate = new getLatestMonday(startDate, -7); // Monday
-    var tableEndDate = new getLatestMonday(endDate, -1); // Sunday
+    var tableStartDate = getLatestMonday(startDate, -7); // Monday
+    var tableEndDate = getLatestMonday(endDate, -1); // Sunday
 
     var colHeaderHeight = args.colHeaderHeight ? args.colHeaderHeight : 20;
     this._colHeaderHeight = colHeaderHeight;
@@ -616,7 +631,16 @@ TableSVG.addMode('Calendar', 'Table', function (Parent, global, utils) {
       currDate.setDate(row * 7 + col + currDate.getDate());
       cell.rect(0, 0, width, height);
       cell.text(0, 0, currDate.getDate());
+      cell.data('year', currDate.getFullYear());
+      cell.data('month', currDate.getMonth());
+      cell.data('day', currDate.getDate());
       return cell;
+    };
+    proto.getActiveDates = function () {
+      var activeCells = this.getActiveCells();
+      return activeCells.map(function (c) {
+        return new Date(c.data('year'), c.data('month'), c.data('day'));
+      });
     }
   })(Calendar.prototype);
   return Calendar;

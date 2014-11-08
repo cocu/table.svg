@@ -31,8 +31,8 @@ TableSVG.addMode('Calendar', 'Table', function (Parent, global, utils) {
       return res;
     };
 
-    var tableStartDate = new getLatestMonday(startDate, -7); // Monday
-    var tableEndDate = new getLatestMonday(endDate, -1); // Sunday
+    var tableStartDate = getLatestMonday(startDate, -7); // Monday
+    var tableEndDate = getLatestMonday(endDate, -1); // Sunday
 
     var colHeaderHeight = args.colHeaderHeight ? args.colHeaderHeight : 20;
     this._colHeaderHeight = colHeaderHeight;
@@ -65,7 +65,16 @@ TableSVG.addMode('Calendar', 'Table', function (Parent, global, utils) {
       currDate.setDate(row * 7 + col + currDate.getDate());
       cell.rect(0, 0, width, height);
       cell.text(0, 0, currDate.getDate());
+      cell.data('year', currDate.getFullYear());
+      cell.data('month', currDate.getMonth());
+      cell.data('day', currDate.getDate());
       return cell;
+    };
+    proto.getActiveDates = function () {
+      var activeCells = this.getActiveCells();
+      return activeCells.map(function (c) {
+        return new Date(c.data('year'), c.data('month'), c.data('day'));
+      });
     }
   })(Calendar.prototype);
   return Calendar;
