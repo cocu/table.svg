@@ -6,31 +6,35 @@
     <!--<script src="src/abstract-table.js" type="application/javascript"></script>-->
     <!--<script src="src/vertical-table.js" type="application/javascript"></script>-->
     <style>
-        .cell rect{
+        .cell rect {
             fill: white;
             stroke: black;
         }
-        .cell text{
+
+        .cell text {
             font-size: 10px;
             dominant-baseline: text-before-edge;
         }
 
-        .active rect{
+        .active rect {
             fill: red;
         }
 
-        .selecting rect{
+        .selecting rect {
             fill: blue;
         }
-        .header rect{
+
+        .header rect {
             fill: pink;
             stroke: red;
         }
-        .col-header text{
+
+        .col-header text {
             text-anchor: middle;
             dominant-baseline: text-before-edge;
         }
-        .row-header text{
+
+        .row-header text {
             text-anchor: middle;
             dominant-baseline: middle;
             font-size: 10px;
@@ -47,26 +51,29 @@
         rowHeights: [10, 50, 30, 20],
         colWidths: [30, 30, 30, 30],
         rowHeaderWidth: 30,
-        rowHeaders: ['1','2','3','4'],
+        rowHeaders: ['1', '2', '3', '4'],
         colHeaderHeight: 30,
-        colHeaders: ['1','2','3','4']
+        colHeaders: ['1', '2', '3', '4']
     });
     document.getElementById('table').appendChild(table.getRootElem());
     var vt = new TableSVG.Mode.VerticalTable({
         rootWidth: '400px',
         rootHeight: '400px',
         rowHeights: [
-            [20, 20, 20, 20, 20],
-            [20, 20, 20, 20, 20],
-            [20, 20, 20, 20, 20],
-            [20, 20, 20, 20, 20],
+            [40, 20, 20, 20],
+            [20, 40, 20, 20],
+            [20, 20, 40, 20],
+            [20, 20, 20, 40],
             [20, 20, 20, 20, 20],
             [20, 20, 20, 20, 20],
             [20, 20, 20, 20, 20]
         ],
         colHeaders: ['あ', 'い', 'う', 'え'],
         colWidths: [20, 20, 20, 20, 20, 20, 20],
-        colHeaderHeight: 30
+        colHeaderHeight: 30,
+        rowHeaders: ['a', 'w', 'o'],
+        rowHeaderWidth: 10,
+        rowHeaderHeights: [20, 40, 20, 20]
     });
     document.getElementById('table').appendChild(vt.getRootElem())
     var c = new TableSVG.Mode.Calendar({

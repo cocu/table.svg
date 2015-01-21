@@ -8,7 +8,10 @@ TableSVG.addMode('VerticalTable', null, function (Parent, global, utils) {
     ];
     var optionalArgs = [
       'colHeaders',
-      'colHeaderHeight'
+      'colHeaderHeight',
+      'rowHeaders',
+      'rowHeaderWidth',
+      'rowHeaderHeights'
     ];
 
     utils.checkArgs(requiredArgs, args);
@@ -23,11 +26,14 @@ TableSVG.addMode('VerticalTable', null, function (Parent, global, utils) {
 
     var colHeaders = args['colHeaders'];
     var colHeaderHeight = args['colHeaderHeight'] ? args['colHeaderHeight'] : 0;
+    var rowHeaders = args['rowHeaders'];
+    var rowHeaderWidth = args['rowHeaderWidth'] ? args['rowHeaderWidth'] : 0;
+    var rowHeaderHeights = args['rowHeaderHeights'] ? args['rowHeaderHeights'] : [];
 
     Parent.call(this, {
       rootHeight: rootHeight,
       rootWidth: rootWidth,
-      viewBox: '0 ' + (-colHeaderHeight) + ' ' + viewWidth + ' ' + (colHeaderHeight + viewHeight)
+      viewBox: (-rowHeaderWidth)+' ' + (-colHeaderHeight) + ' ' + (viewWidth+rowHeaderWidth) + ' ' + (colHeaderHeight + viewHeight)
     });
     var colNum = colWidths.length;
     if (colNum !== rowHeights.length) {
@@ -43,6 +49,9 @@ TableSVG.addMode('VerticalTable', null, function (Parent, global, utils) {
     this._viewHeight = viewHeight;
     this._colHeaders = colHeaders;
     this._colHeaderHeight = colHeaderHeight;
+    this._rowHeaders = rowHeaders;
+    this._rowHeaderWidth = rowHeaderWidth;
+    this._rowHeaderHeights = rowHeaderHeights;
 
 
     this.selectMode = utils.selectMode.horizontal(colNum);
@@ -77,14 +86,26 @@ TableSVG.addMode('VerticalTable', null, function (Parent, global, utils) {
 
       if (this._colHeaders) {
         x = 0;
-        var headers = Snap(utils.createElement('g'));
+        var colHeaders = Snap(utils.createElement('g'));
         this._colWidths.map(function (width, colNo) {
           var header = that.createColHeader(colNo, width);
           utils.translate(header, x, 0);
           x += width;
-          headers.add(header)
+          colHeaders.add(header);
         });
-        table.add(headers);
+        table.add(colHeaders);
+      }
+      
+      if (this._rowHeaders){
+        var y = 0;
+        var rowHeaders = Snap(utils.createElement('g'));
+        this._rowHeaderHeights.map(function(height, rowNo){
+          var header = that.createRowHeader(rowNo, height);
+          y+=height;
+          utils.translate(header, 0, y);
+          rowHeaders.add(header);
+        });
+        table.add(rowHeaders);
       }
     };
     // public methods
@@ -93,7 +114,13 @@ TableSVG.addMode('VerticalTable', null, function (Parent, global, utils) {
       header.rect(0, -this._colHeaderHeight, width, this._colHeaderHeight);
       header.text(width / 2, -this._colHeaderHeight, this._colHeaders[col]);
       return header;
-    }
+    };
+    proto.genRowHeaderElem = function(row, height){
+      var header = Snap(utils.createElement('g'));
+      header.rect(-this._rowHeaderWidth, -height, this._rowHeaderWidth, height);
+      header.text(-this._rowHeaderWidth /2, -height/2, this._rowHeaders[row]);
+      return header;
+    };
   })(VerticalTable.prototype);
 
   return VerticalTable;
