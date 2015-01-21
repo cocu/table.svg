@@ -308,6 +308,9 @@ var TableSVG = (function () {
     return global.doc.createElementNS(xmlns.svg, elemName)
   };
   utils.checkArgs = function (requiredArgs, args) {
+    if (args === undefined) {
+      throw 'UndefinedArgument: ' + args;
+    }
     var lackArgs = requiredArgs.filter(function (elem) {
       return args === undefined || args[elem] === undefined
     }).join(', ');
