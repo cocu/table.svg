@@ -42,7 +42,7 @@ TableSVG.addMode('Calendar', 'Table', function (Parent, global, utils) {
 
     (function () {
       var rowHeights = [];
-      for (var i = weekNum; i--;) {
+      for (var i = weekNum; i > 0; i--) {
         rowHeights.push(30)
       }
       Parent.call(this, {

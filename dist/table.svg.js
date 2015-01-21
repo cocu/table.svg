@@ -5,7 +5,7 @@
 // Licensed under the Apache License, Version 2.0 (the "License")
 //
 // github: https://github.com/cocu/table.svg
-// build : 2014-11-08
+// build : 2015-01-21
 var TableSVG = (function () {
   var xmlns = {
     svg: 'http://www.w3.org/2000/svg',
@@ -316,6 +316,9 @@ var TableSVG = (function () {
     return global.doc.createElementNS(xmlns.svg, elemName)
   };
   utils.checkArgs = function (requiredArgs, args) {
+    if (args === undefined) {
+      throw 'UndefinedArgument: ' + args;
+    }
     var lackArgs = requiredArgs.filter(function (elem) {
       return args === undefined || args[elem] === undefined
     }).join(', ');
@@ -608,7 +611,7 @@ TableSVG.addMode('Calendar', 'Table', function (Parent, global, utils) {
 
     (function () {
       var rowHeights = [];
-      for (var i = weekNum; i--;) {
+      for (var i = weekNum; i > 0; i--) {
         rowHeights.push(30)
       }
       Parent.call(this, {
