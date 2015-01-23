@@ -373,6 +373,10 @@ TableSVG.addMode('VerticalTable', null, function (Parent, global, utils) {
     var rowHeaders = args['rowHeaders'];
     var rowHeaderWidth = args['rowHeaderWidth'] ? args['rowHeaderWidth'] : 0;
     var rowHeaderHeights = args['rowHeaderHeights'] ? args['rowHeaderHeights'] : [];
+    
+    args.additionalClasses = {
+      corner: 'corner'
+    };
 
     Parent.call(this, utils.mergeHash({
       rootHeight: rootHeight,
@@ -434,6 +438,7 @@ TableSVG.addMode('VerticalTable', null, function (Parent, global, utils) {
           var header = headers.g();
           header.rect(-this._rowHeaderWidth, -this._colHeaderHeight, this._rowHeaderWidth, this._colHeaderHeight);
           header.addClass(this.classes.header);
+          header.addClass(this.classes.corner);
         }
         if (this._colHeaders) {
           x = 0;
