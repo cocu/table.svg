@@ -56,14 +56,19 @@ var TableSVG = (function () {
       'rootHeight',
       'viewBox'
     ];
-    var lackArgs = requiredArgs.filter(function (elem) {
-      return args === undefined || args[elem] === undefined
-    }).join(', ');
-    if (lackArgs.length > 0) {
-      throw 'NoRequiredArgument: ' + lackArgs;
-    }
+    var optionalArgs = [
+      'additionalClasses'
+    ];
+    
+    utils.checkArgs(requiredArgs, args);
+    
+    var rootWidth = args['rootWidth'];
+    var rootHeight = args['rootHeight'];
+    var viewBox = args['viewBox'];
+    
+    var additionalClasses = args['additionalClasses']?args['additionalClasses']:{};
 
-    this.classes = {
+    this.classes = utils.hashMerge(additionalClasses, {
       active: 'active',
       root: 'svg-table',
       selecting: 'selecting',
@@ -71,7 +76,7 @@ var TableSVG = (function () {
       rowHeader: 'row-header',
       colHeader: 'col-header',
       header: 'header'
-    };
+    });
 
     this.rootElem = this._initRootElem(args.rootWidth, args.rootHeight, args.viewBox);
 
@@ -326,14 +331,11 @@ var TableSVG = (function () {
       throw 'NoRequiredArgument: ' + lackArgs;
     }
   };
-  /**
-   * @param {object} target
-   * @param {object} source
-   */
-  utils.hashMerge = function (target, source) {
-    for (var key in source) {
-      target[key] = source[key];
+  utils.hashMerge = function (original, updates) {
+    for (var key in updates) {
+      original[key] = updates[key];
     }
+    return original;
   };
   utils.logger = logger;
   utils.selectMode = selectMode;
