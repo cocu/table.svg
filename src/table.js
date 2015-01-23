@@ -34,11 +34,11 @@ TableSVG.addMode('Table', null, function (Parent, global, utils) {
     var rowHeaderWidth = args['rowHeaderWidth'] ? args['rowHeaderWidth'] : 0;
     this._rowHeaderWidth = rowHeaderWidth;
 
-    Parent.call(this, {
+    Parent.call(this, utils.mergeHash({
       rootHeight: rootHeight,
       rootWidth: rootWidth,
       viewBox: '' + (-rowHeaderWidth) + ' ' + (-colHeaderHeight) + ' ' + (viewWidth + rowHeaderWidth) + ' ' + (colHeaderHeight + viewHeight)
-    });
+    }, args));
 
     this._colWidths = colWidths;
     this._rowHeights = rowHeights;

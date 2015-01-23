@@ -68,7 +68,7 @@ var TableSVG = (function () {
     
     var additionalClasses = args['additionalClasses']?args['additionalClasses']:{};
 
-    this.classes = utils.hashMerge(additionalClasses, {
+    this.classes = utils.mergeHash(additionalClasses, {
       active: 'active',
       root: 'svg-table',
       selecting: 'selecting',
@@ -331,7 +331,7 @@ var TableSVG = (function () {
       throw 'NoRequiredArgument: ' + lackArgs;
     }
   };
-  utils.hashMerge = function (original, updates) {
+  utils.mergeHash = function (original, updates) {
     for (var key in updates) {
       original[key] = updates[key];
     }
@@ -374,11 +374,11 @@ TableSVG.addMode('VerticalTable', null, function (Parent, global, utils) {
     var rowHeaderWidth = args['rowHeaderWidth'] ? args['rowHeaderWidth'] : 0;
     var rowHeaderHeights = args['rowHeaderHeights'] ? args['rowHeaderHeights'] : [];
 
-    Parent.call(this, {
+    Parent.call(this, utils.mergeHash({
       rootHeight: rootHeight,
       rootWidth: rootWidth,
       viewBox: (-rowHeaderWidth) + ' ' + (-colHeaderHeight) + ' ' + (viewWidth + rowHeaderWidth) + ' ' + (colHeaderHeight + viewHeight)
-    });
+    }, args));
     var colNum = colWidths.length;
     if (colNum !== rowHeights.length) {
       throw 'no match the number of col and row, col:' + colNum + ' row:' + row.length;
@@ -514,11 +514,11 @@ TableSVG.addMode('Table', null, function (Parent, global, utils) {
     var rowHeaderWidth = args['rowHeaderWidth'] ? args['rowHeaderWidth'] : 0;
     this._rowHeaderWidth = rowHeaderWidth;
 
-    Parent.call(this, {
+    Parent.call(this, utils.mergeHash({
       rootHeight: rootHeight,
       rootWidth: rootWidth,
       viewBox: '' + (-rowHeaderWidth) + ' ' + (-colHeaderHeight) + ' ' + (viewWidth + rowHeaderWidth) + ' ' + (colHeaderHeight + viewHeight)
-    });
+    }, args));
 
     this._colWidths = colWidths;
     this._rowHeights = rowHeights;
@@ -652,14 +652,14 @@ TableSVG.addMode('Calendar', 'Table', function (Parent, global, utils) {
       for (var i = weekNum; i > 0; i--) {
         rowHeights.push(30)
       }
-      Parent.call(this, {
+      Parent.call(this, utils.mergeHash({
         colHeaderHeight: colHeaderHeight,
         colWidths: [40, 40, 40, 40, 40, 40, 40],
         rowHeights: rowHeights,
         rootHeight: rootHeight,
         rootWidth: rootWidth,
         colHeaders: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-      });
+      }, args));
     }).call(this);
   }
 

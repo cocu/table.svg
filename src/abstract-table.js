@@ -60,7 +60,7 @@ var TableSVG = (function () {
     
     var additionalClasses = args['additionalClasses']?args['additionalClasses']:{};
 
-    this.classes = utils.hashMerge(additionalClasses, {
+    this.classes = utils.mergeHash(additionalClasses, {
       active: 'active',
       root: 'svg-table',
       selecting: 'selecting',
@@ -323,7 +323,7 @@ var TableSVG = (function () {
       throw 'NoRequiredArgument: ' + lackArgs;
     }
   };
-  utils.hashMerge = function (original, updates) {
+  utils.mergeHash = function (original, updates) {
     for (var key in updates) {
       original[key] = updates[key];
     }

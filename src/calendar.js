@@ -45,14 +45,14 @@ TableSVG.addMode('Calendar', 'Table', function (Parent, global, utils) {
       for (var i = weekNum; i > 0; i--) {
         rowHeights.push(30)
       }
-      Parent.call(this, {
+      Parent.call(this, utils.mergeHash({
         colHeaderHeight: colHeaderHeight,
         colWidths: [40, 40, 40, 40, 40, 40, 40],
         rowHeights: rowHeights,
         rootHeight: rootHeight,
         rootWidth: rootWidth,
         colHeaders: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-      });
+      }, args));
     }).call(this);
   }
 

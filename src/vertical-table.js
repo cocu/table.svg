@@ -30,11 +30,11 @@ TableSVG.addMode('VerticalTable', null, function (Parent, global, utils) {
     var rowHeaderWidth = args['rowHeaderWidth'] ? args['rowHeaderWidth'] : 0;
     var rowHeaderHeights = args['rowHeaderHeights'] ? args['rowHeaderHeights'] : [];
 
-    Parent.call(this, {
+    Parent.call(this, utils.mergeHash({
       rootHeight: rootHeight,
       rootWidth: rootWidth,
       viewBox: (-rowHeaderWidth) + ' ' + (-colHeaderHeight) + ' ' + (viewWidth + rowHeaderWidth) + ' ' + (colHeaderHeight + viewHeight)
-    });
+    }, args));
     var colNum = colWidths.length;
     if (colNum !== rowHeights.length) {
       throw 'no match the number of col and row, col:' + colNum + ' row:' + row.length;
