@@ -33,7 +33,7 @@ TableSVG.addMode('VerticalTable', null, function (Parent, global, utils) {
     Parent.call(this, {
       rootHeight: rootHeight,
       rootWidth: rootWidth,
-      viewBox: (-rowHeaderWidth)+' ' + (-colHeaderHeight) + ' ' + (viewWidth+rowHeaderWidth) + ' ' + (colHeaderHeight + viewHeight)
+      viewBox: (-rowHeaderWidth) + ' ' + (-colHeaderHeight) + ' ' + (viewWidth + rowHeaderWidth) + ' ' + (colHeaderHeight + viewHeight)
     });
     var colNum = colWidths.length;
     if (colNum !== rowHeights.length) {
@@ -84,28 +84,37 @@ TableSVG.addMode('VerticalTable', null, function (Parent, global, utils) {
         return col;
       });
 
-      if (this._colHeaders) {
-        x = 0;
-        var colHeaders = Snap(utils.createElement('g'));
-        this._colWidths.map(function (width, colNo) {
-          var header = that.createColHeader(colNo, width);
-          utils.translate(header, x, 0);
-          x += width;
-          colHeaders.add(header);
-        });
-        table.add(colHeaders);
-      }
-      
-      if (this._rowHeaders){
-        var y = 0;
-        var rowHeaders = Snap(utils.createElement('g'));
-        this._rowHeaderHeights.map(function(height, rowNo){
-          var header = that.createRowHeader(rowNo, height);
-          y+=height;
-          utils.translate(header, 0, y);
-          rowHeaders.add(header);
-        });
-        table.add(rowHeaders);
+      if (this._colHeaders || this._rowHeaders) {
+        var headers = Snap(utils.createElement('g'));
+        if (this._colHeaders && this._rowHeaders) {
+          var header = headers.g();
+          header.rect(-this._rowHeaderWidth, -this._colHeaderHeight, this._rowHeaderWidth, this._colHeaderHeight);
+          header.addClass(this.classes.header);
+        }
+        if (this._colHeaders) {
+          x = 0;
+          var colHeaders = Snap(utils.createElement('g'));
+          this._colWidths.map(function (width, colNo) {
+            var header = that.createColHeader(colNo, width);
+            utils.translate(header, x, 0);
+            x += width;
+            colHeaders.add(header);
+          });
+          headers.add(colHeaders);
+        }
+
+        if (this._rowHeaders) {
+          var y = 0;
+          var rowHeaders = Snap(utils.createElement('g'));
+          this._rowHeaderHeights.map(function (height, rowNo) {
+            var header = that.createRowHeader(rowNo, height);
+            y += height;
+            utils.translate(header, 0, y);
+            rowHeaders.add(header);
+          });
+          headers.add(rowHeaders);
+        }
+        table.add(headers);
       }
     };
     // public methods
@@ -115,10 +124,10 @@ TableSVG.addMode('VerticalTable', null, function (Parent, global, utils) {
       header.text(width / 2, -this._colHeaderHeight, this._colHeaders[col]);
       return header;
     };
-    proto.genRowHeaderElem = function(row, height){
+    proto.genRowHeaderElem = function (row, height) {
       var header = Snap(utils.createElement('g'));
       header.rect(-this._rowHeaderWidth, -height, this._rowHeaderWidth, height);
-      header.text(-this._rowHeaderWidth /2, -height/2, this._rowHeaders[row]);
+      header.text(-this._rowHeaderWidth / 2, -height / 2, this._rowHeaders[row]);
       return header;
     };
   })(VerticalTable.prototype);
